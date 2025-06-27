@@ -30,12 +30,19 @@ class AIAnalyzer:
     def _extract_response_text(self, message):
         """Extract text from Anthropic API response, handling different formats"""
         try:
-            if hasattr(message.content[0], 'text'):
-                return message.content[0].text.strip()
-            else:
-                return str(message.content[0]).strip()
-        except (AttributeError, IndexError):
-            return str(message.content).strip()
+            # Handle Anthropic Messages API response format
+            if hasattr(message, 'content') and len(message.content) > 0:
+                content_block = message.content[0]
+                if hasattr(content_block, 'text'):
+                    return content_block.text.strip()
+                elif hasattr(content_block, 'content'):
+                    return str(content_block.content).strip()
+                else:
+                    return str(content_block).strip()
+            return str(message).strip()
+        except Exception as e:
+            print(f"DEBUG: Error extracting response text: {e}")
+            return f"Error extracting response: {str(e)}"
     
     def get_market_analysis(self, market_context, economic_data=None):
         """Get AI-powered market analysis"""
@@ -69,9 +76,12 @@ class AIAnalyzer:
                 ]
             )
             
-            return self._extract_response_text(message)
+            response_text = self._extract_response_text(message)
+            print(f"DEBUG: AI response text: {repr(response_text[:100])}")  # Debug log
+            return response_text
         
         except Exception as e:
+            print(f"DEBUG: Error in get_market_analysis: {str(e)}")  # Debug log
             st.error(f"Error getting market analysis: {str(e)}")
             return "AI analysis temporarily unavailable"
     
