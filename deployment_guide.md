@@ -7,10 +7,11 @@ Upload these files and folders to your GitHub repository:
 ### Required Files:
 - `app.py` - Main application
 - `streamlit_config.py` - Streamlit configuration
-- `requirements.txt` - Python dependencies
+- `requirements_streamlit.txt` - Python dependencies (rename to requirements.txt in GitHub)
 - `README.md` - Project documentation
 - `.env.example` - Environment variables template
 - `.gitignore` - Git ignore file
+- `files_for_github.md` - Complete file checklist
 
 ### Required Folders:
 - `components/` - UI components
@@ -60,6 +61,8 @@ In Streamlit Cloud app settings, add these secrets:
 ```toml
 ANTHROPIC_API_KEY = "your_anthropic_api_key_here"
 ALPHA_VANTAGE_API_KEY = "your_alpha_vantage_api_key_here"
+COINGECKO_API_KEY = "your_coingecko_api_key_here"      # Optional
+FINNHUB_API_KEY = "your_finnhub_api_key_here"          # Optional
 ```
 
 ### 4. Get API Keys
@@ -73,6 +76,18 @@ ALPHA_VANTAGE_API_KEY = "your_alpha_vantage_api_key_here"
 1. Go to https://www.alphavantage.co/support/#api-key
 2. Get free API key (500 requests/day)
 3. Add to Streamlit secrets
+
+**Optional API Keys (for enhanced functionality):**
+
+**CoinGecko API Key:**
+1. Go to https://www.coingecko.com/en/api/pricing
+2. Free tier: 10,000 requests/month
+3. Provides enhanced cryptocurrency data
+
+**Finnhub API Key:**
+1. Go to https://finnhub.io/register
+2. Free tier: 60 requests/minute
+3. Backup for stock data when Alpha Vantage hits limits
 
 ## Git Commands
 

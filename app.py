@@ -55,7 +55,7 @@ def main():
         logger.error(f"Error setting page config: {str(e)}")
 
     # Custom navigation - this replaces the default Streamlit page navigation
-    st.sidebar.title("🤖 AI Portfolio Manager")
+    st.sidebar.markdown("<h1 style='font-size: 36px;'>🤖 AI Portfolio Manager</h1>", unsafe_allow_html=True)
     st.sidebar.markdown("### Navigation")
     logger.info("Sidebar navigation initialized")
 

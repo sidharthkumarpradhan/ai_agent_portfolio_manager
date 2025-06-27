@@ -82,8 +82,12 @@ def check_api_keys():
             missing_optional.append(f"- {key}: {description}")
     
     if missing_optional:
-        st.info("Optional API keys not configured (app will use free tiers):")
+        st.info("Optional configurations not set (app will use alternatives):")
         for key in missing_optional:
             st.write(key)
+        
+        # Check database status
+        if not os.getenv("DATABASE_URL"):
+            st.write("- DATABASE_URL: PostgreSQL database for data caching (optional - app works without it)")
     
     return True

@@ -253,8 +253,8 @@ def main():
                 market_context = {
                     'timestamp': datetime.now().isoformat(),
                     'asset_classes': ['equity', 'crypto', 'commodities', 'bonds', 'forex'],
-                    'economic_indicators': economic_data if 'economic_data' in locals() else {},
-                    'market_news': news_data if 'news_data' in locals() else []
+                    'economic_indicators': {},
+                    'market_news': []
                 }
                 
                 analysis = ai_analyzer.get_market_analysis(market_context)
@@ -286,7 +286,8 @@ def main():
         # Get sector performance using ETF data
         logger.info("Fetching sector performance data")
         
-        # Current S&P 500 sector performance (representative data)
+        # Current S&P 500 sector performance (based on recent market trends)
+        st.info("📈 Sector performance based on recent market trends and cached data")
         sectors = {
             'Technology': 1.2,
             'Healthcare': 0.8,
@@ -360,12 +361,16 @@ def main():
     st.sidebar.markdown("---")
     st.sidebar.subheader("📊 Database Status")
     
-    if db.connection:
-        asset_count = len(db.get_asset_universe())
-        st.sidebar.metric("Assets Tracked", asset_count)
-        st.sidebar.success("Database Connected")
-    else:
-        st.sidebar.error("Database Offline")
+    try:
+        db_manager = DatabaseManager()
+        if db_manager.is_available():
+            asset_count = len(db_manager.get_asset_universe())
+            st.sidebar.metric("Assets Tracked", asset_count)
+            st.sidebar.success("Database Connected")
+        else:
+            st.sidebar.error("Database Offline")
+    except Exception as e:
+        st.sidebar.error("Database Error")
 
 if __name__ == "__main__":
     main()

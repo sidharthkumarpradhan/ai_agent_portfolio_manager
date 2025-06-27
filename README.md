@@ -50,6 +50,7 @@ ANTHROPIC_API_KEY=your_anthropic_api_key_here
 ALPHA_VANTAGE_API_KEY=your_alpha_vantage_api_key_here
 COINGECKO_API_KEY=your_coingecko_api_key_here  # Optional
 FINNHUB_API_KEY=your_finnhub_api_key_here      # Optional
+DATABASE_URL=your_postgresql_url_here          # Optional
 ```
 
 5. Run the application:
@@ -81,6 +82,16 @@ streamlit run app.py
 2. Free tier: 60 requests/minute
 3. Used as backup for stock data when Alpha Vantage hits limits
 
+#### Database Configuration (Automatic)
+1. **Default**: SQLite database (automatic, no setup required)
+   - Lightweight file-based database stored in `data/portfolio_manager.db`
+   - Perfect for development and small-scale deployments
+2. **Production**: PostgreSQL (optional upgrade)
+   - Set DATABASE_URL to your PostgreSQL connection string
+   - Format: `postgresql://username:password@host:port/database`
+   - Providers: Neon, Supabase, Railway, etc.
+   - Automatically detected when DATABASE_URL is set
+
 ## Deployment
 
 ### Streamlit Cloud
@@ -97,6 +108,7 @@ streamlit run app.py
    ALPHA_VANTAGE_API_KEY = "your_key_here"
    COINGECKO_API_KEY = "your_key_here"      # Optional
    FINNHUB_API_KEY = "your_key_here"        # Optional
+   DATABASE_URL = "your_postgres_url_here"  # Optional
    ```
 
 ### Local Development

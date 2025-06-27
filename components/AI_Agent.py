@@ -502,69 +502,58 @@ def main():
                 if 'manual_portfolio' not in st.session_state:
                     st.session_state.manual_portfolio = {}
                 
-            # Simplified investment input
-            st.markdown("#### Add Your Investments")
-            st.info("Enter the name of any investment (company name, cryptocurrency, commodity, etc.) and the dollar amount invested")
+                    # Simplified investment input
+                st.markdown("#### Add Your Investments")
+                st.info("Enter the name of any investment (company name, cryptocurrency, commodity, etc.) and the dollar amount invested")
+                
+                col1, col2, col3 = st.columns([2, 1, 1])
+                
+                with col1:
+                    investment_name = st.text_input(
+                        "Investment Name", 
+                        key="investment_name",
+                        help="e.g., Amazon, Apple, Bitcoin, Gold, Treasury Bonds, Crude Oil, Microsoft"
+                    )
             
-            col1, col2, col3 = st.columns([2, 1, 1])
-            
-            with col1:
-                investment_name = st.text_input(
-                    "Investment Name", 
-                    key="investment_name",
-                    help="e.g., Amazon, Apple, Bitcoin, Gold, Treasury Bonds, Crude Oil, Microsoft"
-                )
-            
-            with col2:
-                investment_amount = st.number_input(
-                    "Amount Invested ($)", 
-                        min_value=100.0, 
+                with col2:
+                    investment_amount = st.number_input(
+                        "Amount Invested ($)", 
+                        min_value=0.0,
+                        step=100.0,
                         key="investment_amount",
-                        format="%.2f"
+                        help="Enter the dollar amount"
                     )
                 
                 with col3:
-                    st.write("")  # spacing
-                    if st.button("Add Investment", key="add_investment"):
+                    if st.button("➕ Add Investment", key="add_investment"):
                         if investment_name and investment_amount > 0:
-                            if 'manual_holdings' not in st.session_state.manual_portfolio:
-                                st.session_state.manual_portfolio['manual_holdings'] = {}
-                            
-                            # Store with original name and amount
-                            st.session_state.manual_portfolio['manual_holdings'][investment_name] = {
-                                'name': investment_name,
-                                'amount': investment_amount,
-                                'date_added': pd.Timestamp.now().strftime("%Y-%m-%d")
-                            }
+                            # Add to session state
+                            st.session_state.manual_portfolio[investment_name] = investment_amount
                             st.success(f"Added {investment_name}: ${investment_amount:,.2f}")
+                            # Clear inputs by rerunning
                             st.rerun()
+                        else:
+                            st.error("Please enter both investment name and amount")
                 
-                # Display current holdings
-                if 'manual_holdings' in st.session_state.manual_portfolio and st.session_state.manual_portfolio['manual_holdings']:
+                # Display current portfolio
+                if st.session_state.manual_portfolio:
                     st.markdown("#### Current Portfolio Holdings")
                     
-                    holdings_data = []
-                    total_invested = 0
+                    total_value = 0
+                    for name, amount in st.session_state.manual_portfolio.items():
+                        col_name, col_amount, col_remove = st.columns([3, 1, 1])
+                        with col_name:
+                            st.write(f"**{name}**")
+                        with col_amount:
+                            st.write(f"${amount:,.2f}")
+                        with col_remove:
+                            if st.button("🗑️", key=f"remove_{name}", help="Remove investment"):
+                                del st.session_state.manual_portfolio[name]
+                                st.rerun()
+                        total_value += amount
                     
-                    for investment_name, data in st.session_state.manual_portfolio['manual_holdings'].items():
-                        holdings_data.append({
-                            "Investment": data['name'],
-                            "Amount": f"${data['amount']:,.2f}",
-                            "Date Added": data['date_added']
-                        })
-                        total_invested += data['amount']
-                    
-                    # Display holdings table
-                    df_holdings = pd.DataFrame(holdings_data)
-                    st.dataframe(df_holdings, use_container_width=True)
-                    
-                    # Display total
-                    st.metric("Total Portfolio Value", f"${total_invested:,.2f}")
-                    
-                    # Clear portfolio button
-                    if st.button("🗑️ Clear All Holdings", key="clear_holdings"):
-                        st.session_state.manual_portfolio['manual_holdings'] = {}
-                        st.rerun()
+                    st.markdown("---")
+                    st.markdown(f"### **Total Portfolio Value: ${total_value:,.2f}**")
                 
                 # Analysis button for manual portfolio
                 if ('manual_holdings' in st.session_state.manual_portfolio and 
@@ -814,12 +803,16 @@ def parse_analysis_sections(analysis):
     st.sidebar.markdown("---")
     st.sidebar.subheader("📊 Database Status")
     
-    if db.connection:
-        asset_count = len(db.get_asset_universe())
-        st.sidebar.metric("Assets Tracked", asset_count)
-        st.sidebar.success("Database Connected")
-    else:
-        st.sidebar.error("Database Offline")
+    try:
+        db_manager = DatabaseManager()
+        if db_manager.is_available():
+            asset_count = len(db_manager.get_asset_universe())
+            st.sidebar.metric("Assets Tracked", asset_count)
+            st.sidebar.success("Database Connected")
+        else:
+            st.sidebar.error("Database Offline")
+    except Exception as e:
+        st.sidebar.error("Database Error")
 
 if __name__ == "__main__":
     main()
