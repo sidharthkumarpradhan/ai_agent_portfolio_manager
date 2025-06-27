@@ -31,7 +31,7 @@ class AIAnalyzer:
         """Extract text from Anthropic API response, handling different formats"""
         try:
             if hasattr(message.content[0], 'text'):
-                return self._extract_response_text(message)
+                return message.content[0].text.strip()
             else:
                 return str(message.content[0]).strip()
         except (AttributeError, IndexError):

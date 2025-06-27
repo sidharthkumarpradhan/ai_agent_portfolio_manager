@@ -556,21 +556,20 @@ def main():
                     st.markdown(f"### **Total Portfolio Value: ${total_value:,.2f}**")
                 
                 # Analysis button for manual portfolio
-                if ('manual_holdings' in st.session_state.manual_portfolio and 
-                    st.session_state.manual_portfolio['manual_holdings'] and 
+                if (st.session_state.manual_portfolio and 
                     st.button("🔍 Analyze My Complete Portfolio", type="primary")):
                     
                     with st.spinner("Marcus Wellington is conducting comprehensive portfolio analysis..."):
                         try:
                             # Prepare holdings for analysis
-                            holdings = st.session_state.manual_portfolio['manual_holdings']
+                            holdings = st.session_state.manual_portfolio
                             
                             # Create analysis prompt with all holdings
                             holdings_summary = []
                             total_value = 0
-                            for name, data in holdings.items():
-                                holdings_summary.append(f"- {data['name']}: ${data['amount']:,.2f}")
-                                total_value += data['amount']
+                            for name, amount in holdings.items():
+                                holdings_summary.append(f"- {name}: ${amount:,.2f}")
+                                total_value += amount
                             
                             # Create structured analysis prompt for better formatting
                             analysis_prompt = f"""
@@ -636,8 +635,9 @@ def main():
                             # Get comprehensive analysis using market analysis method
                             logger.info(f"Sending analysis request for {len(holdings)} holdings: {list(holdings.keys())}")
                             analysis = ai_analyzer.get_market_analysis(analysis_prompt)
+                            logger.info(f"Analysis response received: {len(analysis) if analysis else 0} characters")
                             
-                            if analysis and analysis != "AI analysis not available":
+                            if analysis and analysis != "AI analysis not available" and analysis != "AI analysis temporarily unavailable":
                                 st.success("✅ Comprehensive Analysis Complete")
                                 
                                 # Display portfolio summary first
@@ -650,9 +650,9 @@ def main():
                                 
                                 # Show holdings breakdown
                                 st.markdown("#### Holdings Breakdown")
-                                for name, data in holdings.items():
-                                    percentage = (data['amount'] / total_value) * 100
-                                    st.write(f"• **{data['name']}**: ${data['amount']:,.2f} ({percentage:.1f}%)")
+                                for name, amount in holdings.items():
+                                    percentage = (amount / total_value) * 100
+                                    st.write(f"• **{name}**: ${amount:,.2f} ({percentage:.1f}%)")
                                 
                                 st.markdown(f"### Marcus Wellington's Complete Portfolio Analysis")
                                 
@@ -743,6 +743,11 @@ def main():
                                 }
                             else:
                                 st.error("Analysis temporarily unavailable. Please check API connectivity.")
+                                # Debug: Show what we actually received
+                                if analysis:
+                                    st.warning(f"Debug: Received analysis of {len(analysis)} characters")
+                                    with st.expander("Raw Analysis Response", expanded=False):
+                                        st.text_area("Response", analysis, height=200)
                             
                         except Exception as e:
                             logger.error(f"Manual portfolio analysis failed: {str(e)}")
