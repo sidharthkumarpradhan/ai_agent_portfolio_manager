@@ -656,82 +656,78 @@ def main():
                                 
                                 st.markdown(f"### Marcus Wellington's Complete Portfolio Analysis")
                                 
-                                # Parse and display analysis sections properly
-                                analysis_sections = parse_analysis_sections(analysis)
+                                # Display full analysis with proper formatting
+                                with st.expander("📊 Complete Analysis (Full Text)", expanded=True):
+                                    st.text_area("Raw Analysis", analysis, height=400, disabled=True)
                                 
-                                # Display Market Outlook & Individual Assets
+                                # Display parsed analysis sections
                                 with st.expander("📊 Market Outlook & Individual Assets", expanded=True):
-                                    if "market_outlook" in analysis_sections:
-                                        st.markdown("**MARKET OUTLOOK:**")
-                                        st.write(analysis_sections["market_outlook"])
-                                        st.markdown("---")
+                                    # Split analysis into lines and group by sections
+                                    lines = analysis.split('\n')
+                                    current_section = ""
+                                    content = []
                                     
-                                    if "individual_assets" in analysis_sections:
-                                        st.markdown("**INDIVIDUAL ASSETS:**")
-                                        st.write(analysis_sections["individual_assets"])
-                                    else:
-                                        # Show first part of analysis if sections not properly parsed
-                                        analysis_parts = analysis.split('\n\n')
-                                        for i, part in enumerate(analysis_parts[:3]):
-                                            if part.strip():
-                                                st.write(part.strip())
-                                                if i < 2:
+                                    for line in lines:
+                                        if line.strip():
+                                            if any(keyword in line.upper() for keyword in ['MARKET OUTLOOK:', 'INDIVIDUAL ASSETS:', 'FUTURE VALUE:', 'INVESTMENT RECOMMENDATIONS:']):
+                                                if current_section and content:
+                                                    st.markdown(f"**{current_section}**")
+                                                    st.write('\n'.join(content))
                                                     st.markdown("---")
+                                                current_section = line.strip()
+                                                content = []
+                                            else:
+                                                content.append(line.strip())
+                                    
+                                    # Display last section
+                                    if current_section and content:
+                                        st.markdown(f"**{current_section}**")
+                                        st.write('\n'.join(content))
                                 
                                 # Display Future Value Predictions
                                 with st.expander("🔮 Future Value Predictions", expanded=True):
-                                    if "future_predictions" in analysis_sections:
-                                        st.write(analysis_sections["future_predictions"])
-                                    else:
-                                        # Look for prediction keywords in the full text
-                                        prediction_keywords = ["FUTURE VALUE", "1-Year", "5-Year", "10-Year", "Target:", "Outlook"]
-                                        prediction_found = False
-                                        
-                                        for keyword in prediction_keywords:
-                                            start_idx = analysis.upper().find(keyword.upper())
-                                            if start_idx != -1:
-                                                # Find the end of this section (next major section or end)
-                                                next_section_keywords = ["INVESTMENT RECOMMENDATIONS", "REBALANCING", "BONDS:", "STOCKS TO BUY"]
-                                                end_idx = len(analysis)
-                                                for next_keyword in next_section_keywords:
-                                                    next_idx = analysis.upper().find(next_keyword.upper(), start_idx + len(keyword))
-                                                    if next_idx != -1:
-                                                        end_idx = min(end_idx, next_idx)
-                                                
-                                                prediction_text = analysis[start_idx:end_idx].strip()
-                                                if len(prediction_text) > 50:  # Valid section found
-                                                    st.write(prediction_text)
-                                                    prediction_found = True
-                                                    break
-                                        
-                                        if not prediction_found:
-                                            st.warning("Future value predictions not found. Please request specific 1, 5, and 10-year projections.")
+                                    # Look for prediction keywords in the full text
+                                    prediction_keywords = ["FUTURE VALUE", "1-Year", "5-Year", "10-Year", "Target:", "Outlook"]
+                                    prediction_found = False
+                                    
+                                    for keyword in prediction_keywords:
+                                        start_idx = analysis.upper().find(keyword.upper())
+                                        if start_idx != -1:
+                                            # Find the end of this section (next major section or end)
+                                            next_section_keywords = ["INVESTMENT RECOMMENDATIONS", "REBALANCING", "BONDS:", "STOCKS TO BUY"]
+                                            end_idx = len(analysis)
+                                            for next_keyword in next_section_keywords:
+                                                next_idx = analysis.upper().find(next_keyword.upper(), start_idx + len(keyword))
+                                                if next_idx != -1:
+                                                    end_idx = min(end_idx, next_idx)
+                                            
+                                            prediction_text = analysis[start_idx:end_idx].strip()
+                                            if len(prediction_text) > 50:  # Valid section found
+                                                st.write(prediction_text)
+                                                prediction_found = True
+                                                break
+                                    
+                                    if not prediction_found:
+                                        st.warning("Future value predictions not found. Please request specific 1, 5, and 10-year projections.")
                                 
                                 # Display Investment Recommendations
                                 with st.expander("💡 Investment Recommendations", expanded=True):
-                                    if "investment_recommendations" in analysis_sections:
-                                        st.write(analysis_sections["investment_recommendations"])
-                                    else:
-                                        # Look for recommendation keywords
-                                        rec_keywords = ["INVESTMENT RECOMMENDATIONS", "STOCKS TO BUY", "BONDS:", "COMMODITIES:", "FOREX:", "REAL ESTATE:", "IPO"]
-                                        rec_found = False
-                                        
-                                        for keyword in rec_keywords:
-                                            start_idx = analysis.upper().find(keyword.upper())
-                                            if start_idx != -1:
-                                                # Get remaining text from this point
-                                                rec_text = analysis[start_idx:].strip()
-                                                if len(rec_text) > 50:
-                                                    st.write(rec_text)
-                                                    rec_found = True
-                                                    break
-                                        
-                                        if not rec_found:
-                                            st.warning("Investment recommendations not found. Please request specific stock, bond, and commodity suggestions.")
-                                
-                                # Show full analysis in a separate expander
-                                with st.expander("📄 Complete Analysis (Full Text)", expanded=False):
-                                    st.text_area("Full Analysis", analysis, height=400)
+                                    # Look for recommendation keywords
+                                    rec_keywords = ["INVESTMENT RECOMMENDATIONS", "STOCKS TO BUY", "BONDS:", "COMMODITIES:", "FOREX:", "REAL ESTATE:", "IPO"]
+                                    rec_found = False
+                                    
+                                    for keyword in rec_keywords:
+                                        start_idx = analysis.upper().find(keyword.upper())
+                                        if start_idx != -1:
+                                            # Get remaining text from this point
+                                            rec_text = analysis[start_idx:].strip()
+                                            if len(rec_text) > 50:
+                                                st.write(rec_text)
+                                            rec_found = True
+                                            break
+                                    
+                                    if not rec_found:
+                                        st.warning("Investment recommendations not found. Please request specific stock, bond, and commodity suggestions.")
                                 
                                 # Store analysis in session
                                 st.session_state.analyzed_manual_portfolio = {

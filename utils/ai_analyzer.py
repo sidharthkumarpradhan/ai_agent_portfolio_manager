@@ -28,18 +28,12 @@ class AIAnalyzer:
             self.client = None
     
     def _extract_response_text(self, message):
-        """Extract text from Anthropic API response, handling different formats"""
+        """Extract text from Anthropic API response"""
         try:
-            # Handle Anthropic Messages API response format
+            # Standard Anthropic Messages API response format
             if hasattr(message, 'content') and len(message.content) > 0:
-                content_block = message.content[0]
-                if hasattr(content_block, 'text'):
-                    return content_block.text.strip()
-                elif hasattr(content_block, 'content'):
-                    return str(content_block.content).strip()
-                else:
-                    return str(content_block).strip()
-            return str(message).strip()
+                return message.content[0].text.strip()
+            return "No content found in response"
         except Exception as e:
             print(f"DEBUG: Error extracting response text: {e}")
             return f"Error extracting response: {str(e)}"
@@ -69,7 +63,7 @@ class AIAnalyzer:
             
             message = self.client.messages.create(
                 model=self.model,
-                max_tokens=300,
+                max_tokens=2000,  # Increased for comprehensive analysis
                 temperature=0.3,
                 messages=[
                     {"role": "user", "content": prompt}
