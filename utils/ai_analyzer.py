@@ -17,11 +17,25 @@ class AIAnalyzer:
         anthropic_key = os.getenv('ANTHROPIC_API_KEY')
         
         try:
-            self.client = Anthropic(api_key=anthropic_key)
-            self.model = "claude-sonnet-4-20250514"  # Latest model
+            if anthropic_key:
+                self.client = Anthropic(api_key=anthropic_key)
+                self.model = "claude-3-5-sonnet-20241022"  # Stable model for production
+            else:
+                st.error("ANTHROPIC_API_KEY not found. Please add it to your Streamlit secrets.")
+                self.client = None
         except Exception as e:
             st.error(f"Error initializing Anthropic client: {str(e)}")
             self.client = None
+    
+    def _extract_response_text(self, message):
+        """Extract text from Anthropic API response, handling different formats"""
+        try:
+            if hasattr(message.content[0], 'text'):
+                return self._extract_response_text(message)
+            else:
+                return str(message.content[0]).strip()
+        except (AttributeError, IndexError):
+            return str(message.content).strip()
     
     def get_market_analysis(self, market_context, economic_data=None):
         """Get AI-powered market analysis"""
@@ -55,7 +69,7 @@ class AIAnalyzer:
                 ]
             )
             
-            return message.content[0].text.strip()
+            return self._extract_response_text(message)
         
         except Exception as e:
             st.error(f"Error getting market analysis: {str(e)}")
@@ -95,7 +109,7 @@ class AIAnalyzer:
                 ]
             )
             
-            return message.content[0].text.strip()
+            return self._extract_response_text(message)
         
         except Exception as e:
             st.error(f"Error analyzing portfolio: {str(e)}")
@@ -136,7 +150,7 @@ class AIAnalyzer:
                 ]
             )
             
-            return message.content[0].text.strip()
+            return self._extract_response_text(message)
         
         except Exception as e:
             st.error(f"Error getting rebalancing recommendations: {str(e)}")
@@ -175,7 +189,7 @@ class AIAnalyzer:
                 ]
             )
             
-            return message.content[0].text.strip()
+            return self._extract_response_text(message)
         
         except Exception as e:
             st.error(f"Error analyzing news sentiment: {str(e)}")
@@ -219,7 +233,7 @@ class AIAnalyzer:
                 ]
             )
             
-            return message.content[0].text.strip()
+            return self._extract_response_text(message)
         
         except Exception as e:
             st.error(f"Error getting risk assessment: {str(e)}")
@@ -258,7 +272,7 @@ class AIAnalyzer:
                 ]
             )
             
-            return message.content[0].text.strip()
+            return self._extract_response_text(message)
         
         except Exception as e:
             st.error(f"Error generating investment thesis: {str(e)}")

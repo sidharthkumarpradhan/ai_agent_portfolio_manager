@@ -22,8 +22,11 @@ class AutonomousPortfolioAgent:
         # Initialize AI client
         anthropic_key = os.getenv('ANTHROPIC_API_KEY')
         try:
-            self.client = Anthropic(api_key=anthropic_key)
-            self.model = "claude-sonnet-4-20250514"
+            if anthropic_key:
+                self.client = Anthropic(api_key=anthropic_key)
+                self.model = "claude-3-5-sonnet-20241022"
+            else:
+                self.client = None
         except Exception as e:
             st.error(f"Error initializing AI agent: {str(e)}")
             self.client = None
